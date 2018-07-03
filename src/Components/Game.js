@@ -1,40 +1,50 @@
 import React, { Component } from 'react';
 import Square from  './Square.js';
 import Board from  './Board.js';
+import ShoutBox from  './ShoutBox.js';
+
 
 class Game extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      squares: Array(6),
-      xIsNext: true
+      squares: Array(8),
+      xIsNext: true,
+      gameHistory: Array(1).fill("Game Started!")
     }
-    this.state.squares[0] = Array(6).fill(null);
-    this.state.squares[1] = Array(6).fill(null);
-    this.state.squares[2] = Array(6).fill(null);
-    this.state.squares[3] = Array(6).fill(null);
-    this.state.squares[4] = Array(6).fill(null);    
-    this.state.squares[5] = Array(6).fill(null);
-    this.state.squares[2][2]= 'X';
+    this.state.squares[0] = Array(8).fill('E');
+    this.state.squares[1] = Array(8).fill('E');
+    this.state.squares[2] = Array(8).fill('E');
+    this.state.squares[3] = Array(8).fill('E');
+    this.state.squares[4] = Array(8).fill('E');    
+    this.state.squares[5] = Array(8).fill('E');
+    this.state.squares[6] = Array(8).fill('E');    
+    this.state.squares[7] = Array(8).fill('E');
+
     this.state.squares[3][3]= 'X';
-    this.state.squares[2][3]= 'O';
-    this.state.squares[3][2]= 'O'    
+    this.state.squares[4][4]= 'X';
+    this.state.squares[3][4]= 'O';
+    this.state.squares[4][3]= 'O'    
     
   }
   handleClick(i,j) {
     var XX = this.state.xIsNext;
     if(!isValid(this.state.squares,XX,i,j)   ) return;
-    if (calculateWinner(this.state.squares) || this.state.squares[i][j]) {
+    if (calculateWinner(this.state.squares) || this.state.squares[i][j]!='E' ) {
       return;
     }
     console.log("X INS : " + XX);
     fillBoard(this.state.squares,i,j,this.state.xIsNext);
     this.state.squares[i][j] = this.state.xIsNext? 'X' : 'O';
+    this.state.gameHistory.push(getHistoryString(this.state.squares));
     this.setState({
       squares: this.state.squares,
       xIsNext: !this.state.xIsNext,
+      gameHistory: this.state.gameHistory
     });
+    console.log("GMAEMHISTORY" );
+    console.log(this.state.gameHistory);
   }
 
   render() {
@@ -48,22 +58,29 @@ class Game extends React.Component {
     */
     return (
       <div className="game">
+
         <div className="game-board">
+          <div className="game-info">
+            <ol>Next Player  {this.state.xIsNext? ": White" : ": Black"}</ol>
+            <ol>Player White Point { calculatePoint(this.state.squares,'X') }</ol>
+            <ol>Player Black Point  { calculatePoint(this.state.squares, 'O') }</ol>
+          </div>
           <Board
-           squares={this.state.squares}
+            gameHistory={this.state.gameHistory}
+            squares={this.state.squares}
             onClick={(i,j) => this.handleClick(i,j)}
           />
+
         </div>
-        <div className="game-info">
-         
-          <ol>Next Player  {this.state.xIsNext? ": X" : ": O"}</ol>
-          <ol>Player X Point { calculatePoint(this.state.squares,'X') }</ol>
-          <ol>Player O Point  { calculatePoint(this.state.squares, 'O') }</ol>
-          
+        <div>
+          <ShoutBox gameHistory={this.state.gameHistory}/>
         </div>
       </div>
     );
   }
+}
+function getHistoryString(board){
+    return "White " + calculatePoint(board,'X') + " Black " + calculatePoint(board,'O'); 
 }
 function calculatePoint(board,player){
   var counter = 0;
@@ -88,7 +105,7 @@ function isValid(board, nxt,x,y){
   for(var i = x-1; i>=0 ; i--){
     if(board[i][y]==ch){
       if(flag==1){
-          console.log("0");
+          console.log("00");
           return true;
       }
 
@@ -193,6 +210,7 @@ function isValid(board, nxt,x,y){
   return  false;
 }
 function  fillBoard(board, x,y,nxt){
+  console.log("Filling Board!");
   
   var flag=0,fillGrid=0;
   
